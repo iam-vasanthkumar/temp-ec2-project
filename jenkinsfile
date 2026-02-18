@@ -1,22 +1,23 @@
 pipeline {
     agent any
 
-    environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-terraform-creds')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-terraform-creds')
-    }
-
     stages {
 
         stage('Terraform Init') {
             steps {
-                sh 'terraform init'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                credentialsId: 'aws-terraform-creds']]) {
+                    sh 'terraform init'
+                }
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh 'terraform apply -auto-approve'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                credentialsId: 'aws-terraform-creds']]) {
+                    sh 'terraform apply -auto-approve'
+                }
             }
         }
 
@@ -28,7 +29,10 @@ pipeline {
 
         stage('Terraform Destroy') {
             steps {
-                sh 'terraform destroy -auto-approve'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                credentialsId: 'aws-terraform-creds']]) {
+                    sh 'terraform destroy -auto-approve'
+                }
             }
         }
     }
