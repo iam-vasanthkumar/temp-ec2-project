@@ -17,4 +17,9 @@ resource "aws_instance" "temp_server" {
   tags = {
     Name = "Temp-Jenkins-Server"
   }
+  
 } 
+
+output "ec2_public_ip" {
+  value = aws_instance.temp_server.public_ip
+}

@@ -21,11 +21,47 @@ pipeline {
             }
         }
 
-        stage('Wait 3 Minutes') {
+        // ✅ NEW STAGE ADDED
+        stage('Fetch EC2 Public IP') {
             steps {
-                sh 'sleep 180'
+                script {
+                    env.EC2_IP = sh(
+                        script: "terraform output -raw ec2_public_ip",
+                        returnStdout: true
+                    ).trim()
+                }
             }
         }
+
+        // ✅ NEW STAGE ADDED
+        stage('Compile Java Code') {
+            steps {
+                sh 'javac app/HelloWorld.java'
+            }
+        }
+
+        // ✅ NEW STAGE ADDED
+        stage('Copy Class to EC2') {
+            steps {
+                sh """
+                scp -o StrictHostKeyChecking=no -i jenkins-pro.pem app/HelloWorld.class ec2-user@${EC2_IP}:/home/ec2-user
+                """
+            }
+        }
+
+        // ✅ NEW STAGE ADDED
+        stage('Run Java App in EC2') {
+            steps {
+                sh """
+                ssh -o StrictHostKeyChecking=no -i jenkins-pro.pem ec2-user@${EC2_IP} '
+                java HelloWorld
+                '
+                """
+            }
+        }
+
+        // ⏱ Java already runs 10 mins (Thread.sleep)
+        // so no need sleep stage here
 
         stage('Terraform Destroy') {
             steps {
