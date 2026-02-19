@@ -9,10 +9,10 @@ resource "aws_instance" "temp_server" {
 
   user_data = <<-EOF
               #!/bin/bash
-              apt update -y
-              apt install nginx -y
-              systemctl start nginx
+              yum update -y
+              yum install java-17-amazon-corretto -y
               EOF
+            
 
   tags = {
     Name = "Temp-Jenkins-Server"
