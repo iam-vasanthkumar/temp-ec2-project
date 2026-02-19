@@ -3,8 +3,8 @@ provider "aws" {
 }
 
 resource "aws_instance" "temp_server" {
-  ami           = "ami-0317b0f0a0144b137"
-  instance_type = "t2.micro"
+  ami           = "ami-019715e0d74f695be"
+  instance_type = "t3.micro"
   key_name      = "jenkins-pro"
 
   user_data = <<-EOF
@@ -17,4 +17,4 @@ resource "aws_instance" "temp_server" {
   tags = {
     Name = "Temp-Jenkins-Server"
   }
-}
+} 
