@@ -32,12 +32,14 @@ pipeline {
                         script: "terraform output -raw ec2_public_ip",
                         returnStdout: true
                     ).trim()
-                    echo "EC2 Public IP: ${EC2_IP}"
+
+                    env.EC2_IP = EC2_IP
+                    echo "EC2 Public IP: ${env.EC2_IP}"
                 }
             }
         }
 
-        stage('Wait for EC2 to be Ready') {
+        stage('Wait for EC2 to Boot') {
             steps {
                 sh 'sleep 120'
             }
@@ -54,7 +56,7 @@ pipeline {
                 withCredentials([file(credentialsId: 'ec2-pem-key', variable: 'PEM_FILE')]) {
                     sh '''
                     chmod 400 $PEM_FILE
-                    scp -o StrictHostKeyChecking=no -i $PEM_FILE app/HelloWorld.class ec2-user@${EC2_IP}:/home/ec2-user
+                    scp -o StrictHostKeyChecking=no -i $PEM_FILE app/HelloWorld.class ec2-user@$EC2_IP:/home/ec2-user
                     '''
                 }
             }
@@ -64,15 +66,15 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'ec2-pem-key', variable: 'PEM_FILE')]) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no -i $PEM_FILE ec2-user@${EC2_IP} "java HelloWorld"
+                    ssh -o StrictHostKeyChecking=no -i $PEM_FILE ec2-user@$EC2_IP "java HelloWorld"
                     '''
                 }
             }
         }
 
-        stage('Wait 10 Minutes') {
+        stage('Wait 5 Minutes') {
             steps {
-                sh 'sleep 600'
+                sh 'sleep 300'
             }
         }
 
